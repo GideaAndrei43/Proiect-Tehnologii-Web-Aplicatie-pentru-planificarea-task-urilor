@@ -26,25 +26,22 @@ router.post("/register", async (req, res) => {
 
 // LOGIN
 router.post("/login", async (req, res) => {
-  try {
-    const user = await User.findOne({ where: { email: req.body.email }});
+  const { email, password } = req.body;
 
-    if (!user) return res.status(400).send("User not found");
+  if (!email || !password)
+    return res.status(400).json({ msg: "Email și parola sunt obligatorii" });
 
-    const ok = await bcrypt.compare(req.body.password, user.password);
-    if (!ok) return res.status(400).send("Wrong password");
+  const user = await User.findOne({ where: { email } });
+  if (!user) return res.status(400).json({ msg: "User inexistent" });
 
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      "secret123",
-      { expiresIn: "2h" }
-    );
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return res.status(400).json({ msg: "Parola incorecta" });
 
-    res.json({ token });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Server error at LOGIN");
-  }
+  const token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET || "secret123"
+  );
+
+  res.json({ token, role: user.role, userId: user.id });
 });
-
 module.exports = router;

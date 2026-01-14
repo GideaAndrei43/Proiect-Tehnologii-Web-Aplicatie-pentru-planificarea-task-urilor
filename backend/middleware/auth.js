@@ -9,6 +9,6 @@ module.exports=function(req,res,next){
     req.user=decoded;
     next();
   } catch{
-    res.status(400).send("TOKEN INVALID VERE!");
+    res.status(400).send({ error: "TOKEN INVALID VERE!" });
   }
 };

@@ -8,11 +8,15 @@ const Task = sequelize.define("Task", {
   status: {
     type: DataTypes.ENUM("OPEN", "PENDING", "COMPLETED", "CLOSED"),
     defaultValue: "OPEN",
+  },
+  assignedToIds: {  // array de user IDs pentru multi-assign
+    type: DataTypes.JSON,
+    defaultValue: []
   }
 });
 
-// Relations
-Task.belongsTo(User, { as: "assignedTo" });
+// Relația cu creatorul
 Task.belongsTo(User, { as: "createdBy" });
 
+// Nu mai exista assignedTo ca asociere Sequelize
 module.exports = Task;
