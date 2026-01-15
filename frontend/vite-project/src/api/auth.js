@@ -1,4 +1,4 @@
-import { API } from "../api";
+import { API } from "../api.js";
 
 // REGISTER
 export async function register(data) {

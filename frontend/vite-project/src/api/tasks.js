@@ -1,3 +1,5 @@
+import { API, getHeaders } from "../api.js";
+
 async function parseResponse(res) {
   if (res.ok) return res.json();
   // fallback dacă nu e JSON
