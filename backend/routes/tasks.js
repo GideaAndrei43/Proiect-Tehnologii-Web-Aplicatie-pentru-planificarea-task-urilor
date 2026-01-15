@@ -3,15 +3,17 @@ const auth = require("../middleware/auth");
 const Task = require("../models/Task");
 const User = require("../models/User");
 
-// --- CREATE TASK (MANAGER) ---
+// --- CREATE TASK (MANAGER sau ADMIN) ---
 router.post("/", auth, async (req, res) => {
-  if (req.user.role !== "manager") return res.status(403).send("Only managers");
+  if (req.user.role !== "manager" && req.user.role !== "admin") {
+    return res.status(403).send("Only managers or admins can create tasks");
+  }
 
   const task = await Task.create({
     title: req.body.title,
     description: req.body.description,
-    createdById: req.user.id,
-    assignedToIds: [], // obligatoriu empty array
+    createdById: req.user.id, // creator poate fi manager sau admin
+    assignedToIds: [],        // initial empty
     status: "OPEN"
   });
 
@@ -22,11 +24,12 @@ router.post("/", auth, async (req, res) => {
 router.get("/", auth, async (req, res) => {
   let where = {};
 
+  // Manager vede doar task-urile create de el
   if (req.user.role === "manager") {
-    // Managerul vede doar task-urile create de el
     where.createdById = req.user.id;
   }
 
+  // Admin vede toate task-urile, executant vede doar ce e assignat lui
   const tasks = await Task.findAll({
     where,
     include: [{ model: User, as: "createdBy", attributes: ["id", "name"] }]
@@ -40,7 +43,6 @@ router.get("/", auth, async (req, res) => {
       const assignedUsers = allUsers.filter(u => assignedIds.includes(u.id));
       return { ...t.toJSON(), assignedTo: assignedUsers, assignedToIds: assignedIds };
     })
-    // Filtrare pentru executant: doar task-urile assignate lui
     .filter(t => {
       if (req.user.role === "executant") {
         return t.assignedToIds.includes(req.user.id);
@@ -84,7 +86,7 @@ router.post("/complete/:id", auth, async (req, res) => {
   res.json({ ...task.toJSON(), assignedTo: assignedUsers, assignedToIds: assignedIds });
 });
 
-// --- CLOSE TASK (MANAGER OR EXECUTANT ASSIGNED) ---
+// --- CLOSE TASK (MANAGER, ADMIN sau EXECUTANT ASSIGNED) ---
 router.post("/close/:id", auth, async (req, res) => {
   const task = await Task.findByPk(req.params.id);
   if (!task) return res.status(404).send("Task not found");
@@ -92,7 +94,11 @@ router.post("/close/:id", auth, async (req, res) => {
   const assignedIds = task.assignedToIds || [];
   const isAssigned = assignedIds.includes(req.user.id);
 
-  if (req.user.role === "manager" || (req.user.role === "executant" && isAssigned)) {
+  if (
+    req.user.role === "manager" ||
+    req.user.role === "admin" ||          // admin poate închide oricare task
+    (req.user.role === "executant" && isAssigned)
+  ) {
     task.status = "CLOSED";
     await task.save();
 
@@ -105,17 +111,23 @@ router.post("/close/:id", auth, async (req, res) => {
   return res.status(403).send("Access denied");
 });
 
-// --- ASSIGN MULTI USERS (MANAGER) ---
+// --- ASSIGN MULTI USERS (MANAGER sau ADMIN) ---
 router.post("/assign-multi/:id", auth, async (req, res) => {
-  if (req.user.role !== "manager") return res.status(403).send("Only managers");
+  if (req.user.role !== "manager" && req.user.role !== "admin") {
+    return res.status(403).send("Only managers or admins can assign users");
+  }
 
   const task = await Task.findByPk(req.params.id);
   if (!task) return res.status(404).send("Task not found");
-  if (task.createdById !== req.user.id) return res.status(403).send("Not your task");
+
+  // Dacă e manager, poate doar la task-urile lui
+  if (req.user.role === "manager" && task.createdById !== req.user.id) {
+    return res.status(403).send("Not your task");
+  }
 
   const userIds = req.body.userIds || [];
   task.assignedToIds = userIds;
-  task.status = "PENDING";
+  if (userIds.length) task.status = "PENDING"; // dacă are assign, devine pending
   await task.save();
 
   const allUsers = await User.findAll({ attributes: ["id", "name"] });
