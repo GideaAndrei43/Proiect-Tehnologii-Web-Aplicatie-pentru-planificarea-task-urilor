@@ -1,7 +1,7 @@
 // api.js
 export const API = "https://proiect-tehnologii-web-aplicatie-pentru-79ku.onrender.com/api";
 
-// funcție common headers
+
 export function getHeaders() {
   const token = localStorage.getItem("token");
   return {

@@ -2,7 +2,6 @@ import { API, getHeaders } from "../api.js";
 
 async function parseResponse(res) {
   if (res.ok) return res.json();
-  // fallback dacă nu e JSON
   const err = await res.json().catch(() => res.text().then(text => ({ msg: text })));
   throw new Error(err.msg || "Request failed");
 }

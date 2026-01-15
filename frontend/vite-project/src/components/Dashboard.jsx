@@ -18,15 +18,14 @@ export default function Dashboard() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  // Manager – filter by executant
+
   const [selectedExecutantId, setSelectedExecutantId] = useState(null);
   const [filteredTasks, setFilteredTasks] = useState([]);
 
-  // Task editing
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editingTask, setEditingTask] = useState({ title: "", description: "", assignedToIds: [] });
 
-  // Admin – User management
+
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "executant", managerId: null });
 
   // === LOAD TASKS & USERS ===
@@ -43,7 +42,7 @@ export default function Dashboard() {
     }
   };
 
-  // Filter tasks for manager by selected executant
+
   const filterExecutantTasks = (execId, taskList = tasks) => {
     const filtered = taskList.filter(t => t.assignedTo?.some(u => Number(u.id) === Number(execId)));
     setFilteredTasks(filtered);
@@ -99,10 +98,10 @@ export default function Dashboard() {
     if (!title.trim()) return alert("Title is required");
     if (!description.trim() || description.trim().length < 10) return alert("Description must be at least 10 characters");
 
-    // Task creat fără assigned executants
+
     const task = await createTask({ title, description });
 
-    // Dacă manager a selectat assign înainte de create
+
     if (editingTask.assignedToIds.length) {
       await assignTask(task.id, editingTask.assignedToIds);
     }

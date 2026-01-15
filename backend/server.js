@@ -19,9 +19,9 @@ app.use(cors({
 app.use(express.json());
 
 // --- Sync SQLite database ---
-sequelize.sync({ alter: true }) // creeaza tabele noi fara sa stearga datele existente
-  .then(() => console.log("✅ SQLite DB synced"))
-  .catch(err => console.error("❌ DB sync error:", err));
+sequelize.sync({ alter: true }) 
+  .then(() => console.log("SQLite DB synced"))
+  .catch(err => console.error("DB sync error:", err));
 
 // --- Routes ---
 app.get("/", (req, res) => {

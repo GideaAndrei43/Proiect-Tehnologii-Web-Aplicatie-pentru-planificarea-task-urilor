@@ -120,14 +120,14 @@ router.post("/assign-multi/:id", auth, async (req, res) => {
   const task = await Task.findByPk(req.params.id);
   if (!task) return res.status(404).send("Task not found");
 
-  // Dacă e manager, poate doar la task-urile lui
+
   if (req.user.role === "manager" && task.createdById !== req.user.id) {
     return res.status(403).send("Not your task");
   }
 
   const userIds = req.body.userIds || [];
   task.assignedToIds = userIds;
-  if (userIds.length) task.status = "PENDING"; // dacă are assign, devine pending
+  if (userIds.length) task.status = "PENDING"; 
   await task.save();
 
   const allUsers = await User.findAll({ attributes: ["id", "name"] });

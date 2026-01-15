@@ -9,7 +9,6 @@ export async function register(data) {
   });
 
   if (!res.ok) {
-    // fallback fără await în callback
     const err = await res.json().catch(() => res.text().then(text => ({ msg: text })));
     throw new Error(err.msg || "Eroare la register");
   }

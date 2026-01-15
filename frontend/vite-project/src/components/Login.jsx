@@ -8,7 +8,7 @@ export default function Login({ setToken, setRole }) {
   const [roleType, setRoleType] = useState("executant");
   const [tab, setTab] = useState("login");
 
-  // Helper pentru validare email
+  
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   // --- HANDLE LOGIN ---
@@ -25,7 +25,7 @@ export default function Login({ setToken, setRole }) {
       setRole(res.role);
       setEmail("");
       setPassword("");
-      // Navigate removed – frontend will render dashboard based on localStorage
+
     } catch (err) {
       alert(err.message || "Login failed");
     }

@@ -15,8 +15,7 @@ const Task = sequelize.define("Task", {
   }
 });
 
-// Relația cu creatorul
+
 Task.belongsTo(User, { as: "createdBy" });
 
-// Nu mai exista assignedTo ca asociere Sequelize
 module.exports = Task;
