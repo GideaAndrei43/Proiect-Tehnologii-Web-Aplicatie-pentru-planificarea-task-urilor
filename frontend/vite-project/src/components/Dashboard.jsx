@@ -99,10 +99,17 @@ export default function Dashboard() {
     if (!title.trim()) return alert("Title is required");
     if (!description.trim() || description.trim().length < 10) return alert("Description must be at least 10 characters");
 
+    // Task creat fără assigned executants
     const task = await createTask({ title, description });
-    if (editingTask.assignedToIds.length) await assignTask(task.id, editingTask.assignedToIds);
 
-    setTitle(""); setDescription(""); setEditingTask({ title: "", description: "", assignedToIds: [] });
+    // Dacă manager a selectat assign înainte de create
+    if (editingTask.assignedToIds.length) {
+      await assignTask(task.id, editingTask.assignedToIds);
+    }
+
+    setTitle(""); 
+    setDescription(""); 
+    setEditingTask({ title: "", description: "", assignedToIds: [] });
     load();
   };
 
@@ -153,8 +160,8 @@ export default function Dashboard() {
     <div style={{ padding: "20px", fontFamily: "Helvetica, Arial, sans-serif", color: "white", minHeight: "100vh", background: "linear-gradient(135deg, #1e1e2f, #3b3b58)" }}>
       <h2>Dashboard – {role.toUpperCase()}</h2>
 
-      {/* MANAGER CREATE TASK */}
-      {role === "manager" && (
+      {/* MANAGER / ADMIN CREATE TASK */}
+      {(role === "manager" || role === "admin") && (
         <div style={glassStyle}>
           <h3>Create & Assign Task</h3>
           <input style={inputStyle} placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
@@ -186,7 +193,7 @@ export default function Dashboard() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
             {/* Manager assign */}
-            {role === "manager" && t.status === "OPEN" && (
+            {(role === "manager" || role === "admin") && t.status === "OPEN" && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
                 {users.filter(u => u.role === "executant").map(u => (
                   <label key={u.id} style={{ display: "flex", alignItems: "center", gap: "5px", background: "rgba(255,255,255,0.1)", padding: "2px 5px", borderRadius: "5px" }}>
@@ -207,7 +214,8 @@ export default function Dashboard() {
               <button style={buttonStyle} onClick={() => handleCompleteTask(t.id)}>Complete</button>
             )}
             {(role === "executant" && t.assignedTo?.some(a => a.id === userId) && t.status === "COMPLETED") ||
-             (role === "manager" && t.status === "COMPLETED") ? (
+             (role === "manager" && t.status === "COMPLETED") ||
+             (role === "admin" && t.status === "COMPLETED") ? (
               <button style={buttonStyle} onClick={() => handleCloseTask(t.id)}>Close</button>
             ) : null}
           </div>
@@ -221,6 +229,13 @@ export default function Dashboard() {
           <div>
             <b>{t.title}</b> – <i>{t.status}</i><br />
             <span style={{ fontSize: "0.9em" }}>Assigned to: {t.assignedTo?.map(u => u.name).join(", ") || "None"} | Created by: {t.createdBy?.name}</span>
+          </div>
+          <div style={{ marginTop: "5px" }}>
+            {(role === "executant" && t.assignedTo?.some(a => a.id === userId) && t.status === "COMPLETED") ||
+             (role === "manager" && t.status === "COMPLETED") ||
+             (role === "admin" && t.status === "COMPLETED") ? (
+              <button style={buttonStyle} onClick={() => handleCloseTask(t.id)}>Close</button>
+            ) : null}
           </div>
         </div>
       ))}
