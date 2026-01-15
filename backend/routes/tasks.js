@@ -5,7 +5,7 @@ const User = require("../models/User");
 
 // --- CREATE TASK (MANAGER sau ADMIN) ---
 router.post("/", auth, async (req, res) => {
-  if (req.user.role !== "manager" && req.user.role !== "admin") {
+  if (!["manager", "admin"].includes(req.user.role)) {
     return res.status(403).send("Only managers or admins can create tasks");
   }
 
@@ -113,7 +113,7 @@ router.post("/close/:id", auth, async (req, res) => {
 
 // --- ASSIGN MULTI USERS (MANAGER sau ADMIN) ---
 router.post("/assign-multi/:id", auth, async (req, res) => {
-  if (req.user.role !== "manager" && req.user.role !== "admin") {
+  if (!["manager", "admin"].includes(req.user.role)) {
     return res.status(403).send("Only managers or admins can assign users");
   }
 
