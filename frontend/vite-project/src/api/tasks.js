@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api/tasks";
+import { API } from "../api";
 
 function getHeaders() {
   return {

@@ -9,7 +9,10 @@ require("./models/User");
 require("./models/Task");
 
 const app = express();
-app.use(cors());
+const cors = require("cors");
+app.use(cors({
+  origin: "*" // pentru test
+}));
 app.use(express.json());
 
 // --- Sync SQLite database ---

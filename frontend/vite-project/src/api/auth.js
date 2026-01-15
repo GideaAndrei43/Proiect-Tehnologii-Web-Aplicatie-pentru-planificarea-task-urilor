@@ -1,4 +1,4 @@
-const API="http://localhost:5000/api"
+import { API } from "../api";
 
 export async function register(data){
   const res=await fetch(`${API}/auth/register`,{

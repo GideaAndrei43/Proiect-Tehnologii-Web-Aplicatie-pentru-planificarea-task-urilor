@@ -1,4 +1,4 @@
-const API = "http://localhost:5000/api/users";
+import { API } from "../api";
 
 function getHeaders() {
   return {
