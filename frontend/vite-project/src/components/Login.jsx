@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { login, register } from "../api/auth";
-import { useNavigate } from "react-router-dom";
 
 export default function Login({ setToken, setRole }) {
   const [email, setEmail] = useState("");
@@ -8,7 +7,6 @@ export default function Login({ setToken, setRole }) {
   const [name, setName] = useState("");
   const [roleType, setRoleType] = useState("executant");
   const [tab, setTab] = useState("login");
-  const navigate = useNavigate();
 
   // Helper pentru validare email
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -27,7 +25,7 @@ export default function Login({ setToken, setRole }) {
       setRole(res.role);
       setEmail("");
       setPassword("");
-      navigate("/dashboard");
+      // Navigate removed – frontend will render dashboard based on localStorage
     } catch (err) {
       alert(err.message || "Login failed");
     }
