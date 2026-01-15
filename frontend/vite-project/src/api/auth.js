@@ -7,7 +7,10 @@ export async function register(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text() || "Eroare la register");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ msg: await res.text() }));
+    throw new Error(err.msg || "Eroare la register");
+  }
   return res.json();
 }
 
@@ -18,6 +21,9 @@ export async function login(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text() || "Eroare la login");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ msg: await res.text() }));
+    throw new Error(err.msg || "Eroare la login");
+  }
   return res.json();
 }

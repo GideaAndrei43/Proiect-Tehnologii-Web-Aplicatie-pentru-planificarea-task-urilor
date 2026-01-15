@@ -1,11 +1,11 @@
 import { API } from "../api";
 
-// helper pentru header cu token
+// helper pentru headers cu token
 function getHeaders() {
   const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(token ? { "x-auth-token": token } : {}),
   };
 }
 
@@ -34,7 +34,7 @@ export async function createTask(data) {
   return res.json();
 }
 
-// ASSIGN TASK MULTI (manager)
+// ASSIGN MULTI (manager)
 export async function assignTask(taskId, userIds) {
   const res = await fetch(`${API}/tasks/assign-multi/${taskId}`, {
     method: "POST",
@@ -55,7 +55,7 @@ export async function completeTask(taskId) {
   return res.json();
 }
 
-// CLOSE TASK (manager)
+// CLOSE TASK (manager/executant)
 export async function closeTask(taskId) {
   const res = await fetch(`${API}/tasks/close/${taskId}`, {
     method: "POST",

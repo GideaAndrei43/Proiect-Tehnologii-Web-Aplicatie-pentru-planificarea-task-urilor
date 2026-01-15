@@ -1,15 +1,23 @@
 import { useState } from "react";
 import { login, register } from "../api/auth";
+import { useNavigate } from "react-router-dom";
 
 export default function Login({ setToken, setRole }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [roleType, setRoleType] = useState("executant");
-  const [tab, setTab] = useState("login"); // "login" sau "register"
+  const [tab, setTab] = useState("login");
+  const navigate = useNavigate();
 
+  // Helper pentru validare email
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  // --- HANDLE LOGIN ---
   const handleLogin = async () => {
     if (!email || !password) return alert("Please enter email and password");
+    if (!isValidEmail(email)) return alert("Please enter a valid email");
+
     try {
       const res = await login({ email, password });
       localStorage.setItem("token", res.token);
@@ -17,20 +25,30 @@ export default function Login({ setToken, setRole }) {
       localStorage.setItem("userId", res.userId);
       setToken(res.token);
       setRole(res.role);
+      setEmail("");
+      setPassword("");
+      navigate("/dashboard");
     } catch (err) {
-      alert(err.message);
+      alert(err.message || "Login failed");
     }
   };
 
+  // --- HANDLE REGISTER ---
   const handleRegister = async () => {
     if (!name || !email || !password) return alert("All fields are required");
+    if (!isValidEmail(email)) return alert("Please enter a valid email");
+    if (password.length < 6) return alert("Password must be at least 6 characters");
+
     try {
       await register({ name, email, password, role: roleType });
-      alert("User created!");
-      // Optional: switch to login tab
+      alert("User created successfully!");
+      setName("");
+      setEmail("");
+      setPassword("");
+      setRoleType("executant");
       setTab("login");
     } catch (err) {
-      alert(err.message);
+      alert(err.message || "Registration failed");
     }
   };
 
@@ -56,7 +74,7 @@ export default function Login({ setToken, setRole }) {
     outline: "none",
     background: "rgba(255,255,255,0.1)",
     color: "white",
-    fontSize: "1em"
+    fontSize: "1em",
   };
 
   const buttonStyle = {
@@ -81,19 +99,25 @@ export default function Login({ setToken, setRole }) {
   });
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "center",
-      background: "linear-gradient(135deg, #1e1e2f, #3b3b58)",
-      fontFamily: "Helvetica, Arial, sans-serif"
-    }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #1e1e2f, #3b3b58)",
+        fontFamily: "Helvetica, Arial, sans-serif",
+      }}
+    >
       <div style={glassStyle}>
         {/* Tabs */}
         <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px" }}>
-          <div style={tabStyle(tab === "login")} onClick={() => setTab("login")}>Login</div>
-          <div style={tabStyle(tab === "register")} onClick={() => setTab("register")}>Register</div>
+          <div style={tabStyle(tab === "login")} onClick={() => setTab("login")}>
+            Login
+          </div>
+          <div style={tabStyle(tab === "register")} onClick={() => setTab("register")}>
+            Register
+          </div>
         </div>
 
         {/* LOGIN */}
@@ -112,7 +136,9 @@ export default function Login({ setToken, setRole }) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button style={buttonStyle} onClick={handleLogin}>Login</button>
+            <button style={buttonStyle} onClick={handleLogin}>
+              Login
+            </button>
           </>
         )}
 
@@ -145,9 +171,11 @@ export default function Login({ setToken, setRole }) {
             >
               <option value="executant">Executant</option>
               <option value="manager">Manager</option>
-             
+              <option value="admin">Admin</option>
             </select>
-            <button style={buttonStyle} onClick={handleRegister}>Register</button>
+            <button style={buttonStyle} onClick={handleRegister}>
+              Register
+            </button>
           </>
         )}
       </div>

@@ -1,11 +1,11 @@
 import { API } from "../api";
 
-// helper pentru header cu token
+// helper pentru headers cu token
 function getHeaders() {
   const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
-    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    ...(token ? { "x-auth-token": token } : {}),
   };
 }
 
