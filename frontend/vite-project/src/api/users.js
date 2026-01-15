@@ -1,29 +1,22 @@
-import { API } from "../api";
-
-// helper pentru headers cu token
-function getHeaders() {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { "x-auth-token": token } : {}),
-  };
+async function parseResponse(res) {
+  if (res.ok) return res.json();
+  const err = await res.json().catch(() => res.text().then(text => ({ msg: text })));
+  throw new Error(err.msg || "Request failed");
 }
 
 // GET ALL USERS
 export async function getUsers() {
   const res = await fetch(`${API}/users`, { headers: getHeaders() });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
 // GET USER BY ID
 export async function getUser(id) {
   const res = await fetch(`${API}/users/${id}`, { headers: getHeaders() });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// ADD USER (ADMIN)
+// ADD USER
 export async function addUser(data) {
   if (!data.name || !data.email || !data.password || !data.role)
     throw new Error("Name, email, password, and role are required");
@@ -35,27 +28,24 @@ export async function addUser(data) {
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// UPDATE USER (ADMIN)
+// UPDATE USER
 export async function updateUser(id, data) {
   const res = await fetch(`${API}/users/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// DELETE USER (ADMIN)
+// DELETE USER
 export async function deleteUser(id) {
   const res = await fetch(`${API}/users/${id}`, {
     method: "DELETE",
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }

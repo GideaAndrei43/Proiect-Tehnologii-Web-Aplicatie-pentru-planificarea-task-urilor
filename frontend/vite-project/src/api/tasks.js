@@ -1,77 +1,66 @@
-import { API } from "../api";
-
-// helper pentru headers cu token
-function getHeaders() {
-  const token = localStorage.getItem("token");
-  return {
-    "Content-Type": "application/json",
-    ...(token ? { "x-auth-token": token } : {}),
-  };
+async function parseResponse(res) {
+  if (res.ok) return res.json();
+  // fallback dacă nu e JSON
+  const err = await res.json().catch(() => res.text().then(text => ({ msg: text })));
+  throw new Error(err.msg || "Request failed");
 }
 
 // GET ALL TASKS
 export async function getTasks() {
   const res = await fetch(`${API}/tasks`, { headers: getHeaders() });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
 // GET TASK BY ID
 export async function getTask(id) {
   const res = await fetch(`${API}/tasks/${id}`, { headers: getHeaders() });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// CREATE TASK (manager)
+// CREATE TASK
 export async function createTask(data) {
   const res = await fetch(`${API}/tasks`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// ASSIGN MULTI (manager)
+// ASSIGN MULTI
 export async function assignTask(taskId, userIds) {
   const res = await fetch(`${API}/tasks/assign-multi/${taskId}`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ userIds }),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// COMPLETE TASK (executant)
+// COMPLETE TASK
 export async function completeTask(taskId) {
   const res = await fetch(`${API}/tasks/complete/${taskId}`, {
     method: "POST",
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// CLOSE TASK (manager/executant)
+// CLOSE TASK
 export async function closeTask(taskId) {
   const res = await fetch(`${API}/tasks/close/${taskId}`, {
     method: "POST",
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
 
-// UPDATE TASK (admin)
+// UPDATE TASK
 export async function updateTask(taskId, data) {
   const res = await fetch(`${API}/tasks/${taskId}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  return parseResponse(res);
 }
