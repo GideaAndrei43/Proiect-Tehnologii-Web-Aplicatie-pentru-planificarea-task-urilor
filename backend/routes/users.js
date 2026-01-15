@@ -26,17 +26,22 @@ router.get("/:id", auth, async (req, res) => {
 
   res.json(user);
 });
-//ASSIGN MANAGER
+
+// ASSIGN MANAGER
 router.put("/assign-manager/:id", auth, async (req, res) => {
   if (req.user.role !== "admin")
     return res.status(403).send("Only admin");
 
   const user = await User.findByPk(req.params.id);
+  if (!user) return res.status(404).send("User not found");
+
   user.managerId = req.body.managerId;
   await user.save();
 
   res.json(user);
 });
+
+// UPDATE USER
 router.put("/:id", auth, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).json({ error: "Only admin" });
 
@@ -47,7 +52,6 @@ router.put("/:id", auth, async (req, res) => {
   res.json(user);
 });
 
-// ADD USER (ADMIN)
 // ADD USER (ADMIN)
 router.post("/", auth, async (req, res) => {
   if (req.user.role !== "admin") return res.status(403).send("Only admin");
@@ -77,9 +81,5 @@ router.delete("/:id", auth, async (req, res) => {
   await user.destroy();
   res.json({ message: "User deleted" });
 });
-
-
-
-
 
 module.exports = router;

@@ -1,56 +1,65 @@
 import { API } from "../api";
 
+// helper pentru header cu token
 function getHeaders() {
+  const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
-    "x-auth-token": localStorage.getItem("token")
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
 }
 
-// LISTARE TASKURI
+// GET ALL TASKS
 export async function getTasks() {
-  const res = await fetch(API, { headers: getHeaders() });
+  const res = await fetch(`${API}/tasks`, { headers: getHeaders() });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-// CREARE TASK (manager)
+// GET TASK BY ID
+export async function getTask(id) {
+  const res = await fetch(`${API}/tasks/${id}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// CREATE TASK (manager)
 export async function createTask(data) {
-  const res = await fetch(API, {
+  const res = await fetch(`${API}/tasks`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-// ASIGN TASK MULTI (manager)
+// ASSIGN TASK MULTI (manager)
 export async function assignTask(taskId, userIds) {
-  const res = await fetch(`${API}/assign-multi/${taskId}`, {
+  const res = await fetch(`${API}/tasks/assign-multi/${taskId}`, {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({ userIds })
+    body: JSON.stringify({ userIds }),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-// COMPLETARE TASK (executant)
+// COMPLETE TASK (executant)
 export async function completeTask(taskId) {
-  const res = await fetch(`${API}/complete/${taskId}`, {
+  const res = await fetch(`${API}/tasks/complete/${taskId}`, {
     method: "POST",
-    headers: getHeaders()
+    headers: getHeaders(),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-// INCHIDERE TASK (manager)
+// CLOSE TASK (manager)
 export async function closeTask(taskId) {
-  const res = await fetch(`${API}/close/${taskId}`, {
+  const res = await fetch(`${API}/tasks/close/${taskId}`, {
     method: "POST",
-    headers: getHeaders()
+    headers: getHeaders(),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -58,18 +67,11 @@ export async function closeTask(taskId) {
 
 // UPDATE TASK (admin)
 export async function updateTask(taskId, data) {
-  const res = await fetch(`${API}/${taskId}`, {
+  const res = await fetch(`${API}/tasks/${taskId}`, {
     method: "PUT",
     headers: getHeaders(),
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error("Error updating task");
-  return res.json();
-}
-
-// GET TASK BY ID
-export async function getTask(id) {
-  const res = await fetch(`${API}/${id}`, { headers: getHeaders() });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }

@@ -1,63 +1,61 @@
 import { API } from "../api";
 
+// helper pentru header cu token
 function getHeaders() {
+  const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
-    "x-auth-token": localStorage.getItem("token"),
+    ...(token ? { "Authorization": `Bearer ${token}` } : {}),
   };
 }
 
+// GET ALL USERS
 export async function getUsers() {
-  const res = await fetch(API, { headers: getHeaders() });
+  const res = await fetch(`${API}/users`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
+// GET USER BY ID
 export async function getUser(id) {
-  const res = await fetch(`${API}/${id}`, { headers: getHeaders() });
+  const res = await fetch(`${API}/users/${id}`, { headers: getHeaders() });
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
-export async function updateUser(id, data) {
-  const res = await fetch(`${API}/${id}`, {
-    method: "PUT",
-    headers: getHeaders(),
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Error updating user");
-  return res.json();
-}
-
-// **NOU**: addUser
+// ADD USER (ADMIN)
 export async function addUser(data) {
-  // Verificăm că există câmpurile obligatorii
-  if (!data.name || !data.email || !data.password || !data.role) {
+  if (!data.name || !data.email || !data.password || !data.role)
     throw new Error("Name, email, password, and role are required");
-  }
 
-  // Convertim managerId la integer dacă există
   if (data.managerId) data.managerId = parseInt(data.managerId);
 
-  const res = await fetch(API, {
+  const res = await fetch(`${API}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(errorText || "Error adding user");
-  }
-
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
 
+// UPDATE USER (ADMIN)
+export async function updateUser(id, data) {
+  const res = await fetch(`${API}/users/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// DELETE USER (ADMIN)
 export async function deleteUser(id) {
-  const res = await fetch(`${API}/${id}`, {
+  const res = await fetch(`${API}/users/${id}`, {
     method: "DELETE",
     headers: getHeaders(),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
-
-
